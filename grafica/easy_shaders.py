@@ -1,22 +1,12 @@
 # coding=utf-8
-"""
-Simple Shaders.
-"""
-
-__all__ = [
-    'SimpleModelViewProjectionShaderProgram',
-    'SimpleShaderProgram',
-    'SimpleTextureModelViewProjectionShaderProgram',
-    'SimpleTextureShaderProgram',
-    'SimpleTextureTransformShaderProgram',
-    'SimpleTransformShaderProgram',
-    'textureSimpleSetup'
-]
+"""Simple Shaders"""
 
 from OpenGL.GL import *
 import OpenGL.GL.shaders
 import numpy as np
 from PIL import Image
+
+import grafica.basic_shapes as bs
 from grafica.gpu_shape import GPUShape
 
 __author__ = "Daniel Calderon"
@@ -28,8 +18,8 @@ SIZE_IN_BYTES = 4
 
 
 def textureSimpleSetup(imgName, sWrapMode, tWrapMode, minFilterMode, maxFilterMode):
-    # wrapMode: GL_REPEAT, GL_CLAMP_TO_EDGE
-    # filterMode: GL_LINEAR, GL_NEAREST
+     # wrapMode: GL_REPEAT, GL_CLAMP_TO_EDGE
+     # filterMode: GL_LINEAR, GL_NEAREST
     texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texture)
 
@@ -42,7 +32,7 @@ def textureSimpleSetup(imgName, sWrapMode, tWrapMode, minFilterMode, maxFilterMo
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, maxFilterMode)
 
     image = Image.open(imgName)
-    img_data = np.array(image, np.uint8)
+    img_data = np.array(list(image.getdata()), np.uint8)
 
     if image.mode == "RGB":
         internalFormat = GL_RGB
@@ -62,8 +52,9 @@ def textureSimpleSetup(imgName, sWrapMode, tWrapMode, minFilterMode, maxFilterMo
 class SimpleShaderProgram:
 
     def __init__(self):
+
         vertex_shader = """
-            #version 330
+            #version 130
 
             in vec3 position;
             in vec3 color;
@@ -77,7 +68,7 @@ class SimpleShaderProgram:
             """
 
         fragment_shader = """
-            #version 330
+            #version 130
             in vec3 newColor;
 
             out vec4 outColor;
@@ -87,15 +78,13 @@ class SimpleShaderProgram:
             }
             """
 
-        # Binding artificial vertex array object for validation
-        VAO = glGenVertexArrays(1)
-        glBindVertexArray(VAO)
-
         self.shaderProgram = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER))
 
+
     def setupVAO(self, gpuShape):
+
         glBindVertexArray(gpuShape.vao)
 
         glBindBuffer(GL_ARRAY_BUFFER, gpuShape.vbo)
@@ -105,13 +94,14 @@ class SimpleShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
+        
         color = glGetAttribLocation(self.shaderProgram, "color")
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
 
         # Unbinding current vao
         glBindVertexArray(0)
+
 
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
         assert isinstance(gpuShape, GPUShape)
@@ -127,8 +117,9 @@ class SimpleShaderProgram:
 class SimpleTextureShaderProgram:
 
     def __init__(self):
+
         vertex_shader = """
-            #version 330
+            #version 130
 
             in vec3 position;
             in vec2 texCoords;
@@ -143,7 +134,7 @@ class SimpleTextureShaderProgram:
             """
 
         fragment_shader = """
-            #version 330
+            #version 130
 
             in vec2 outTexCoords;
 
@@ -156,10 +147,6 @@ class SimpleTextureShaderProgram:
                 outColor = texture(samplerTex, outTexCoords);
             }
             """
-
-        # Binding artificial vertex array object for validation
-        VAO = glGenVertexArrays(1)
-        glBindVertexArray(VAO)
 
         self.shaderProgram = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
@@ -175,7 +162,7 @@ class SimpleTextureShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
+        
         texCoords = glGetAttribLocation(self.shaderProgram, "texCoords")
         glVertexAttribPointer(texCoords, 2, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(12))
         glEnableVertexAttribArray(texCoords)
@@ -183,14 +170,14 @@ class SimpleTextureShaderProgram:
         # Unbinding current vao
         glBindVertexArray(0)
 
+
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
         assert isinstance(gpuShape, GPUShape)
 
         # Binding the VAO and executing the draw call
         glBindVertexArray(gpuShape.vao)
-        glBindTexture(GL_TEXTURE_2D, gpuShape.texture)
         glDrawElements(mode, gpuShape.size, GL_UNSIGNED_INT, None)
-
+        
         # Unbind the current VAO
         glBindVertexArray(0)
 
@@ -198,8 +185,9 @@ class SimpleTextureShaderProgram:
 class SimpleTransformShaderProgram:
 
     def __init__(self):
+
         vertex_shader = """
-            #version 330
+            #version 130
             
             uniform mat4 transform;
 
@@ -216,7 +204,7 @@ class SimpleTransformShaderProgram:
             """
 
         fragment_shader = """
-            #version 330
+            #version 130
             in vec3 newColor;
 
             out vec4 outColor;
@@ -226,10 +214,6 @@ class SimpleTransformShaderProgram:
                 outColor = vec4(newColor, 1.0f);
             }
             """
-
-        # Binding artificial vertex array object for validation
-        VAO = glGenVertexArrays(1)
-        glBindVertexArray(VAO)
 
         self.shaderProgram = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
@@ -245,7 +229,7 @@ class SimpleTransformShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
+        
         color = glGetAttribLocation(self.shaderProgram, "color")
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
@@ -253,13 +237,14 @@ class SimpleTransformShaderProgram:
         # Unbinding current vao
         glBindVertexArray(0)
 
+
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
         assert isinstance(gpuShape, GPUShape)
 
         # Binding the VAO and executing the draw call
         glBindVertexArray(gpuShape.vao)
         glDrawElements(mode, gpuShape.size, GL_UNSIGNED_INT, None)
-
+        
         # Unbind the current VAO
         glBindVertexArray(0)
 
@@ -267,8 +252,9 @@ class SimpleTransformShaderProgram:
 class SimpleTextureTransformShaderProgram:
 
     def __init__(self):
+
         vertex_shader = """
-            #version 330
+            #version 130
 
             uniform mat4 transform;
 
@@ -285,7 +271,7 @@ class SimpleTextureTransformShaderProgram:
             """
 
         fragment_shader = """
-            #version 330
+            #version 130
 
             in vec2 outTexCoords;
 
@@ -299,16 +285,14 @@ class SimpleTextureTransformShaderProgram:
             }
             """
 
-        # Binding artificial vertex array object for validation
-        VAO = glGenVertexArrays(1)
-        glBindVertexArray(VAO)
-
         # Compiling our shader program
         self.shaderProgram = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER))
 
+
     def setupVAO(self, gpuShape):
+
         glBindVertexArray(gpuShape.vao)
 
         glBindBuffer(GL_ARRAY_BUFFER, gpuShape.vbo)
@@ -318,13 +302,14 @@ class SimpleTextureTransformShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
+        
         texCoords = glGetAttribLocation(self.shaderProgram, "texCoords")
         glVertexAttribPointer(texCoords, 2, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(3 * SIZE_IN_BYTES))
         glEnableVertexAttribArray(texCoords)
 
         # Unbinding current vao
         glBindVertexArray(0)
+
 
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
         assert isinstance(gpuShape, GPUShape)
@@ -340,8 +325,9 @@ class SimpleTextureTransformShaderProgram:
 class SimpleModelViewProjectionShaderProgram:
 
     def __init__(self):
+
         vertex_shader = """
-            #version 330
+            #version 130
             
             uniform mat4 projection;
             uniform mat4 view;
@@ -359,7 +345,7 @@ class SimpleModelViewProjectionShaderProgram:
             """
 
         fragment_shader = """
-            #version 330
+            #version 130
             in vec3 newColor;
 
             out vec4 outColor;
@@ -369,15 +355,13 @@ class SimpleModelViewProjectionShaderProgram:
             }
             """
 
-        # Binding artificial vertex array object for validation
-        VAO = glGenVertexArrays(1)
-        glBindVertexArray(VAO)
-
         self.shaderProgram = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
+
     def setupVAO(self, gpuShape):
+
         glBindVertexArray(gpuShape.vao)
 
         glBindBuffer(GL_ARRAY_BUFFER, gpuShape.vbo)
@@ -387,13 +371,14 @@ class SimpleModelViewProjectionShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
+        
         color = glGetAttribLocation(self.shaderProgram, "color")
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
 
         # Unbinding current vao
         glBindVertexArray(0)
+
 
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
         assert isinstance(gpuShape, GPUShape)
@@ -409,8 +394,9 @@ class SimpleModelViewProjectionShaderProgram:
 class SimpleTextureModelViewProjectionShaderProgram:
 
     def __init__(self):
+
         vertex_shader = """
-            #version 330
+            #version 130
             
             uniform mat4 projection;
             uniform mat4 view;
@@ -429,7 +415,7 @@ class SimpleTextureModelViewProjectionShaderProgram:
             """
 
         fragment_shader = """
-            #version 330
+            #version 130
 
             uniform sampler2D samplerTex;
 
@@ -443,15 +429,13 @@ class SimpleTextureModelViewProjectionShaderProgram:
             }
             """
 
-        # Binding artificial vertex array object for validation
-        VAO = glGenVertexArrays(1)
-        glBindVertexArray(VAO)
-
         self.shaderProgram = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
+
     def setupVAO(self, gpuShape):
+
         glBindVertexArray(gpuShape.vao)
 
         glBindBuffer(GL_ARRAY_BUFFER, gpuShape.vbo)
@@ -461,13 +445,14 @@ class SimpleTextureModelViewProjectionShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
+        
         texCoords = glGetAttribLocation(self.shaderProgram, "texCoords")
         glVertexAttribPointer(texCoords, 2, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(12))
         glEnableVertexAttribArray(texCoords)
 
         # Unbinding current vao
         glBindVertexArray(0)
+
 
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
         assert isinstance(gpuShape, GPUShape)
@@ -479,3 +464,5 @@ class SimpleTextureModelViewProjectionShaderProgram:
 
         # Unbind the current VAO
         glBindVertexArray(0)
+
+

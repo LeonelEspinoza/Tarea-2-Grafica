@@ -1,9 +1,5 @@
 # coding=utf-8
-"""
-Convenience functionality to access assets files.
-"""
-
-__all__ = ['getAssetPath']
+"""Convenience functionality to access assets files"""
 
 import os.path
 
