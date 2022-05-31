@@ -157,7 +157,7 @@ if __name__ == "__main__":
     # Creating shapes on GPU memory
     gpuAxis = createGPUShape(mvpPipeline, bs.createAxis(7))
 
-    shapeSuzanne = readOBJ(getAssetPath('suzanne.obj'), (0.9, 0.6, 0.2))
+    shapeSuzanne = readOBJ(getAssetPath('crash normal pose.obj'), (0.9, 0.6, 0.2))
     gpuSuzanne = createGPUShape(pipeline, shapeSuzanne)
 
     shapeCarrot = readOBJ(getAssetPath('carrot.obj'), (0.6, 0.9, 0.5))

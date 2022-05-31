@@ -74,6 +74,10 @@ def on_key(window, key, scancode, action, mods):
 
 
 if __name__ == "__main__":
+    width = 1000
+    height = 1000
+
+    window = glfw.create_window(width, height, "Dice", None, None)
 
     # Initialize glfw
     if not glfw.init():
@@ -82,7 +86,7 @@ if __name__ == "__main__":
     width = 1000
     height = 1000
 
-    window = glfw.create_window(width, height, "Dice", None, None)
+    window = glfw.create_window(width, height, "Crash lights out", None, None)
 
     if not window:
         glfw.terminate()
@@ -105,8 +109,11 @@ if __name__ == "__main__":
     glEnable(GL_DEPTH_TEST)
 
     # Creating shapes on GPU memory
-    skybox = ModeloTarea.create_skybox(textureShaderProgram)
-    floor = ModeloTarea.create_floor(textureShaderProgram)
+#    startbox = ModeloTarea.create_START_BOX(textureShaderProgram)
+#    tubebox = ModeloTarea.create_TUBE(textureShaderProgram)
+#    finishbox = ModeloTarea.create_FINISH_BOX(textureShaderProgram)
+#    floor = ModeloTarea.create_floor(textureShaderProgram)
+    level = ModeloTarea.create_level(textureShaderProgram,0,4)
 
     # View and projection
     projection = tr.perspective(60, float(width)/float(height), 0.1, 100) #fovy  aspect  near  far
@@ -155,8 +162,11 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(textureShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
         #glUniformMatrix4fv(glGetUniformLocation(textureShaderProgram.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
 
-        sg.drawSceneGraphNode(skybox, textureShaderProgram, "model")
-        sg.drawSceneGraphNode(floor, textureShaderProgram, "model")      
+        #sg.drawSceneGraphNode(startbox, textureShaderProgram, "model")
+        #sg.drawSceneGraphNode(tubebox, textureShaderProgram, "model")
+        #sg.drawSceneGraphNode(finishbox, textureShaderProgram, "model")
+        #sg.drawSceneGraphNode(floor, textureShaderProgram, "model")      
+        sg.drawSceneGraphNode(level, textureShaderProgram, 'model')
 
         # Once the drawing is rendered, buffers are swap so an uncomplete drawing is never seen.
         glfw.swap_buffers(window)
