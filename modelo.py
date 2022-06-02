@@ -70,7 +70,6 @@ def create_tree(pipeline):
 
     return tree
 
-
 def create_house(pipeline):
     # Piramide cafe
     brown_pyramid = createColorPyramid(166/255, 112/255, 49/255)

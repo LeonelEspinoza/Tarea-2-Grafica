@@ -1,5 +1,7 @@
 # coding=utf-8
-
+"""
+Lee .OBJ y .OFF
+"""
 
 import glfw
 from OpenGL.GL import *
@@ -7,6 +9,7 @@ import numpy as np
 import sys
 import os.path
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import grafica.transformations as tr
 import grafica.basic_shapes as bs
 import grafica.easy_shaders as es
@@ -15,15 +18,18 @@ import grafica.performance_monitor as pm
 from grafica.assets_path import getAssetPath
 
 
-#CONTROL QUE INDICA SI SE LLENAN LOS POLIGONOS O NO
+
+
+# A class to store the application control
 class Controller:
     def __init__(self):
         self.fillPolygon = True
 
+
+# We will use the global controller as communication with the callback function
 controller = Controller()
 
 
-#RELACION TECLAS ACCION
 def on_key(window, key, scancode, action, mods):
     if action != glfw.PRESS:
         return
@@ -66,21 +72,14 @@ def readOBJ(filename, color):
             aux = line.strip().split(' ')
 
             if aux[0] == 'v':
-                vertices += [[float(coord) for coord in aux[1:] if coord]]
+                vertices += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vn':
                 normals += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vt':
-                if float(aux[-1])==0.0 and len(aux[1:])>2:
-                    textCoords += [[float(coord) for coord in aux[1:-1]]]
-                elif len(aux[1:])==2:
-                    textCoords +=[[float(coord) for coord in aux[1:]]]
-                else:
-                    raise ValueError('3D Textures are not allowed.')
-
-                #assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                #textCoords += [[float(coord) for coord in aux[1:]]]
+                assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
+                textCoords += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'f':
                 N = len(aux)
@@ -113,20 +112,101 @@ def readOBJ(filename, color):
         return bs.Shape(vertexData, indices)
 
 
+def createOFFShape(pipeline, filename, r, g, b):
+    shape = readOFF(getAssetPath(filename), (r, g, b))
+    gpuShape = es.GPUShape().initBuffers()
+    pipeline.setupVAO(gpuShape)
+    gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
+
+    return gpuShape
+
+
+def readOFF(filename, color):
+    vertices = []
+    normals = []
+    faces = []
+
+    with open(filename, 'r') as file:
+        line = file.readline().strip()
+        assert line == "OFF"
+
+        line = file.readline().strip()
+        aux = line.split(' ')
+
+        numVertices = int(aux[0])
+        numFaces = int(aux[1])
+
+        for i in range(numVertices):
+            aux = file.readline().strip().split(' ')
+            vertices += [float(coord) for coord in aux[0:]]
+
+        vertices = np.asarray(vertices)
+        vertices = np.reshape(vertices, (numVertices, 3))
+        print(f'Vertices shape: {vertices.shape}')
+
+        normals = np.zeros((numVertices, 3), dtype=np.float32)
+        print(f'Normals shape: {normals.shape}')
+
+        for i in range(numFaces):
+            aux = file.readline().strip().split(' ')
+            aux = [int(index) for index in aux[0:]]
+            faces += [aux[1:]]
+
+            vecA = [vertices[aux[2]][0] - vertices[aux[1]][0], vertices[aux[2]][1] - vertices[aux[1]][1],
+                    vertices[aux[2]][2] - vertices[aux[1]][2]]
+            vecB = [vertices[aux[3]][0] - vertices[aux[2]][0], vertices[aux[3]][1] - vertices[aux[2]][1],
+                    vertices[aux[3]][2] - vertices[aux[2]][2]]
+
+            res = np.cross(vecA, vecB)
+            normals[aux[1]][0] += res[0]
+            normals[aux[1]][1] += res[1]
+            normals[aux[1]][2] += res[2]
+
+            normals[aux[2]][0] += res[0]
+            normals[aux[2]][1] += res[1]
+            normals[aux[2]][2] += res[2]
+
+            normals[aux[3]][0] += res[0]
+            normals[aux[3]][1] += res[1]
+            normals[aux[3]][2] += res[2]
+            # print(faces)
+        norms = np.linalg.norm(normals, axis=1)
+        normals = normals / norms[:, None]
+
+        color = np.asarray(color)
+        color = np.tile(color, (numVertices, 1))
+
+        vertexData = np.concatenate((vertices, color), axis=1)
+        vertexData = np.concatenate((vertexData, normals), axis=1)
+
+        print(vertexData.shape)
+
+        indices = []
+        vertexDataF = []
+        index = 0
+
+        for face in faces:
+            vertex = vertexData[face[0], :]
+            vertexDataF += vertex.tolist()
+            vertex = vertexData[face[1], :]
+            vertexDataF += vertex.tolist()
+            vertex = vertexData[face[2], :]
+            vertexDataF += vertex.tolist()
+
+            indices += [index, index + 1, index + 2]
+            index += 3
+
+        return bs.Shape(vertexDataF, indices)
+
 if __name__ == "__main__":
 
     # Initialize glfw
-    width = 600
-    height = 600
-    title = "visualizador"
-    window = glfw.create_window(width, height, title, None, None)
-
     if not glfw.init():
         glfw.set_window_should_close(window, True)
 
     width = 600
     height = 600
-    title = "visualizador"
+    title = "Reading a *.obj file"
     window = glfw.create_window(width, height, title, None, None)
 
     if not window:
@@ -141,6 +221,7 @@ if __name__ == "__main__":
     # Defining shader programs
     pipeline = ls.SimpleGouraudShaderProgram()
     mvpPipeline = es.SimpleModelViewProjectionShaderProgram()
+    
 
     # Telling OpenGL to use our shader program
     glUseProgram(pipeline.shaderProgram)
@@ -164,7 +245,7 @@ if __name__ == "__main__":
     # Creating shapes on GPU memory
     gpuAxis = createGPUShape(mvpPipeline, bs.createAxis(7))
 
-    shapeSuzanne = readOBJ(getAssetPath('crash2.obj'), (0.9, 0.6, 0.2))
+    shapeSuzanne = readOBJ(getAssetPath('suzanne.obj'), (0.9, 0.6, 0.2))
     gpuSuzanne = createGPUShape(pipeline, shapeSuzanne)
 
     shapeCarrot = readOBJ(getAssetPath('carrot.obj'), (0.6, 0.9, 0.5))

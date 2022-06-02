@@ -81,7 +81,7 @@ def create_level(pipeline,x,z):
     tubes=sg.SceneGraphNode("tubes")
     tubes.transform=tr.uniformScale(1)
     n=1
-    while z-1-n >0: #no quiero cambiar z para los pisos y le resto uno porque ya está puesto el start y no llega a 0 porque necesito poner el finish
+    while z-1-n >0: #no quiero cambiar z para los pisos y le resto uno porque ya está puesto el start
         TUBEbox=create_TUBE(pipeline,n)
         tubes.childs += [TUBEbox]
         n+=1
