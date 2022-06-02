@@ -22,9 +22,9 @@ import ModeloTarea
 # A class to store the application control
 class Controller:
     def __init__(self):
-        self.fillPolygon = True
-        self.vista3 = False
+        self.vista3 = True
         self.cambiovista = False
+        self.IsOnGround = True
 ###########################################################
         self.theta = np.pi
         self.eye = [0, 0, 0.1]  # Básicamente la posición del jugador
@@ -37,52 +37,70 @@ class Controller:
 controller = Controller()
 
 def process_on_key(dt):
-    if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
+    if glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS:
         controller.theta += 2 * dt
 
-    elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
+    elif glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS:
         controller.theta -= 2 * dt
+
+    elif glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
+        if controller.eye[1]>-0.5:
+            controller.eye[1] -= 1 * dt
+            controller.at[1] -= 1 * dt
+
+    elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
+        if controller.eye[1]<0.5:
+            controller.eye[1] += 1 * dt
+            controller.at[1] += 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_W) == glfw.PRESS:
         controller.eye += (controller.at - controller.eye) * dt
         controller.at += (controller.at - controller.eye) * dt
 
     elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
-        controller.eye -= (controller.at - controller.eye) * dt
-        controller.at -= (controller.at - controller.eye) * dt
+        if controller.eye[0]<0.5:
+            controller.eye -= (controller.at - controller.eye) * dt
+            controller.at -= (controller.at - controller.eye) * dt
     
     elif glfw.get_key(window, glfw.KEY_LEFT_SHIFT) == glfw.PRESS:
-        controller.eye[2] -= 0.1 * dt
-        controller.at[2] -= 0.1 * dt
+        if controller.eye[2]>0.1:
+            controller.eye[2] -= 1 * dt
+            controller.at[2] -= 1 * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        controller.eye[2] += 0.1 * dt
-        controller.at[2] += 0.1 * dt
+        if controller.eye[2]<0.5:
+            controller.eye[2] += 1 * dt
+            controller.at[2] += 1 * dt
 
 def process_on_key3(dt):
     if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
-        controller.eye[1] -= 1 * dt
-        controller.at[1] -= 1 * dt
+        if controller.at[1]>-0.5:
+            controller.eye[1] -= 1 * dt
+            controller.at[1] -= 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
-        controller.eye[1] += 1 * dt
-        controller.at[1] += 1 * dt
+        if controller.at[1]<0.5:
+            controller.eye[1] += 1 * dt
+            controller.at[1] += 1 * dt
 
-    elif glfw.get_key(window, glfw.KEY_W) == glfw.PRESS:
+    elif glfw.get_key(window, glfw.KEY_W) == glfw.PRESS: #este no necesita limite porque le quitare el control al jugador al llegar al final
         controller.eye[0] -= 1 * dt
         controller.at[0] -= 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
-        controller.eye[0] += 1 * dt
-        controller.at[0] += 1 * dt
+        if controller.eye[0]<0.5:
+            controller.eye[0] += 1 * dt
+            controller.at[0] += 1 * dt
     
     elif glfw.get_key(window, glfw.KEY_LEFT_SHIFT) == glfw.PRESS:
-        controller.eye[2] -= 1 * dt
-        controller.at[2] -= 1 * dt
+        if controller.at [2]>0.1:
+            controller.eye[2] -= 1 * dt
+            controller.at[2] -= 1 * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        controller.eye[2] += 1 * dt
-        controller.at[2] += 1 * dt
+        if controller.at[2]<0.5:
+            controller.eye[2] += 1 * dt
+            controller.at[2] += 1 * dt
     
 def on_key(window, key, scancode, action, mods):
 
@@ -97,15 +115,13 @@ def on_key(window, key, scancode, action, mods):
     if key == glfw.KEY_ESCAPE:
         glfw.set_window_should_close(window, True)
 
-    #else:
-    #    print('Unknown key')
-
 
 if __name__ == "__main__":
 
     # Initialize glfw
     if not glfw.init():
-        glfw.set_window_should_close(window, True)
+        #glfw.set_window_should_close(window, True)
+        glfw.terminate
 
     width = 1500
     height = 1000
@@ -164,11 +180,19 @@ if __name__ == "__main__":
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
         #vista primera-tercera persona
-        if (controller.vista3):  
+        if (controller.vista3):  #vista tercera persona
             if not (controller.cambiovista):  
                 controller.at = controller.eye                                  #la camara mira a donde está el personaje
                 controller.eye= controller.eye - np.array([-0.7, 0, -0.3])      #la camara retrocede en x y sube en z, no cambia en y
                 controller.cambiovista = True
+                print(controller.at)
+                print(controller.eye)
+            
+            if controller.at[2]<=0.1:
+                controller.IsOnGround = False 
+            else:
+                controller.IsOnGround = True
+
             process_on_key3(dt)
 
             view = tr.lookAt(
@@ -176,17 +200,20 @@ if __name__ == "__main__":
                 controller.at,
                 controller.up
             )
-            #que la camara sea en tercera persona
-            #la camara debe apuntar al obj 
-            #la camara no se debe mover hacia el at, sino que con el obj
-            
 
         else: #vista primera persona
             if (controller.cambiovista):
                 controller.at = controller.at + np.array([0,1,0])               #la camara mira justo en frente de donde está el personaje
                 controller.eye = controller.eye + np.array([-0.7, 0, -0.3])     #la camara avanza en x y baja en z, no cambia en y
                 controller.cambiovista = False
-            
+                print(controller.at)
+                print(controller.eye)
+
+            if controller.eye[2]<=0.1:
+                controller.IsOnGround = False 
+            else:
+                controller.IsOnGround = True
+
             process_on_key(dt)
             
             at_x = controller.eye[0] + np.cos(controller.theta)
@@ -198,22 +225,12 @@ if __name__ == "__main__":
                 controller.at,
                 controller.up
             )
+            
+            
 
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        # Procesar input
-        #process_on_key(dt)
-
-        #at_x = controller.eye[0] + np.cos(controller.theta)
-        #at_y = controller.eye[1] + np.sin(controller.theta)
-        #controller.at = np.array([at_x, at_y, controller.at[2]])
-
-        #view = tr.lookAt(
-        #    controller.eye,
-        #    controller.at,
-        #    controller.up
-        #)
 
         ###DIBUJO LEVEL###
         glUseProgram(textureShaderProgram.shaderProgram)
@@ -224,35 +241,28 @@ if __name__ == "__main__":
         sg.drawSceneGraphNode(level, textureShaderProgram, 'model')
         ###---###
 
-        ###DIBUJO OBJ###
-        # Dibujamos el modelo de Suzanne con OBJ:
-        # Indicamos que usamos el modelo de luz
-        # Se escala, se rota y se sube, en ese orden
-        if controller.vista3:    
+        
+        if controller.vista3:   #si esta en tercera persona dibujar el OBJ 
+            ###DIBUJO OBJ###
+            # Dibujamos el modelo de Suzanne con OBJ:
+            # Indicamos que usamos el modelo de luz
+            # Se escala, se rota y se sube, en ese orden
             suzanne_transform = tr.matmul(
                 [
-                    tr.translate(controller.at[0],controller.at[1]+0.1,controller.at[2]),
+                    tr.translate(controller.at[0],controller.at[1]+0.1,controller.at[2]-0.1),
                     tr.rotationX(np.pi/2),
                     tr.uniformScale(0.00003),
                 ]
             )
-        else:
-            suzanne_transform = tr.matmul(
-                [
-                    tr.translate(0,0,-2),
-                    tr.rotationX(np.pi/2),
-                    tr.uniformScale(0.00003),
-                ]
-            )
+            glUseProgram(lightShaderProgram.shaderProgram)
+            glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "model"), 1, GL_TRUE, suzanne_transform)
+            glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
+            glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "projection"), 1, GL_TRUE, projection)
+            # Esto es para indicarle al shader de luz parámetros, pero por ahora no lo veremos
+            lightShaderProgram.set_light_attributes() # IGNORAR
+            lightShaderProgram.drawCall(gpuSuzanne)
             
-        glUseProgram(lightShaderProgram.shaderProgram)
-        glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "model"), 1, GL_TRUE, suzanne_transform)
-        glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
-        glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        # Esto es para indicarle al shader de luz parámetros, pero por ahora no lo veremos
-        lightShaderProgram.set_light_attributes() # IGNORAR
-        lightShaderProgram.drawCall(gpuSuzanne)
-        ###---###
+        
 
         # Once the drawing is rendered, buffers are swap so an uncomplete drawing is never seen.
         glfw.swap_buffers(window)
