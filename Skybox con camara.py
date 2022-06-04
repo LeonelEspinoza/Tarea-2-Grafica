@@ -18,6 +18,10 @@ from grafica.assets_path import getAssetPath
 
 import ModeloTarea
 
+x=0.8#recomendable 0-5, rango 0-1, mayor es execivo
+y=8#largo
+z=5#tiempo
+
 
 # A class to store the application control
 class Controller:
@@ -44,12 +48,12 @@ def process_on_key(dt):
         controller.theta -= 2 * dt
 
     elif glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
-        if controller.eye[1]>-0.5:
+        if controller.eye[1]>-1:
             controller.eye[1] -= 1 * dt
             controller.at[1] -= 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
-        if controller.eye[1]<0.5:
+        if controller.eye[1]<1:
             controller.eye[1] += 1 * dt
             controller.at[1] += 1 * dt
 
@@ -58,7 +62,7 @@ def process_on_key(dt):
         controller.at += (controller.at - controller.eye) * dt
 
     elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
-        if controller.eye[0]<0.5:
+        if controller.eye[0]<1:
             controller.eye -= (controller.at - controller.eye) * dt
             controller.at -= (controller.at - controller.eye) * dt
     
@@ -68,18 +72,18 @@ def process_on_key(dt):
             controller.at[2] -= 1 * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        if controller.eye[2]<0.5:
+        if controller.eye[2]<1:
             controller.eye[2] += 1 * dt
             controller.at[2] += 1 * dt
 
 def process_on_key3(dt):
     if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
-        if controller.at[1]>-0.5:
+        if controller.at[1]>-1:
             controller.eye[1] -= 1 * dt
             controller.at[1] -= 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
-        if controller.at[1]<0.5:
+        if controller.at[1]<1:
             controller.eye[1] += 1 * dt
             controller.at[1] += 1 * dt
 
@@ -88,7 +92,7 @@ def process_on_key3(dt):
         controller.at[0] -= 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
-        if controller.eye[0]<0.5:
+        if controller.eye[0]<1:
             controller.eye[0] += 1 * dt
             controller.at[0] += 1 * dt
     
@@ -98,7 +102,7 @@ def process_on_key3(dt):
             controller.at[2] -= 1 * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        if controller.at[2]<0.5:
+        if controller.at[2]<1:
             controller.eye[2] += 1 * dt
             controller.at[2] += 1 * dt
     
@@ -109,7 +113,7 @@ def on_key(window, key, scancode, action, mods):
     
     global controller
     
-    if key == glfw.KEY_F:
+    if key == glfw.KEY_L:
         controller.vista3 = not controller.vista3
 
     if key == glfw.KEY_ESCAPE:
@@ -149,7 +153,7 @@ if __name__ == "__main__":
     glEnable(GL_DEPTH_TEST)
 
     # Creating shapes on GPU memory
-    level = ModeloTarea.create_level(textureShaderProgram,0,3)
+    level = ModeloTarea.create_level(textureShaderProgram,x,y)
 
     # Creamos una GPUShape a partir de un obj
     # Acá pueden poner carrot.obj, eiffel.obj, suzanne.obj
