@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     # Creamos una GPUShape a partir de un obj
     # Acá pueden poner carrot.obj, eiffel.obj, suzanne.obj
-    shapeSuzanne = obj.readOBJ(getAssetPath('eiffel.obj'), (1.0, 0.0, 0.0))
+    shapeSuzanne = obj.readOBJ(getAssetPath('crash_pose.obj'), (1.0, 0.0, 0.0))
     gpuSuzanne = es.GPUShape().initBuffers()
     lightShaderProgram.setupVAO(gpuSuzanne)
     gpuSuzanne.fillBuffers(shapeSuzanne.vertices, shapeSuzanne.indices, GL_STATIC_DRAW)
@@ -187,7 +187,7 @@ if __name__ == "__main__":
         if (controller.vista3):  #vista tercera persona
             if not (controller.cambiovista):  
                 controller.at = controller.eye                                  #la camara mira a donde está el personaje
-                controller.eye= controller.eye - np.array([-0.7, 0, -0.3])      #la camara retrocede en x y sube en z, no cambia en y
+                controller.eye= controller.eye - np.array([-0.8, 0, -0.4])      #la camara retrocede en x y sube en z, no cambia en y
                 controller.cambiovista = True
                 print(controller.at)
                 print(controller.eye)
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         else: #vista primera persona
             if (controller.cambiovista):
                 controller.at = controller.at + np.array([0,1,0])               #la camara mira justo en frente de donde está el personaje
-                controller.eye = controller.eye + np.array([-0.7, 0, -0.3])     #la camara avanza en x y baja en z, no cambia en y
+                controller.eye = controller.eye + np.array([-0.8, 0, -0.4])     #la camara avanza en x y baja en z, no cambia en y
                 controller.cambiovista = False
                 print(controller.at)
                 print(controller.eye)
@@ -253,9 +253,10 @@ if __name__ == "__main__":
             # Se escala, se rota y se sube, en ese orden
             suzanne_transform = tr.matmul(
                 [
-                    tr.translate(controller.at[0],controller.at[1]+0.1,controller.at[2]-0.1),
+                    tr.translate(controller.at[0]-0.8,controller.at[1]-0.3,controller.at[2]+0.1), #controller.at[0],controller.at[1]+0.1,controller.at[2]-0.1
                     tr.rotationX(np.pi/2),
-                    tr.uniformScale(0.00003),
+                    tr.rotationY(np.pi/-2),
+                    tr.uniformScale(0.2),
                 ]
             )
             glUseProgram(lightShaderProgram.shaderProgram)

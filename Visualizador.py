@@ -167,7 +167,7 @@ if __name__ == "__main__":
     shapeSuzanne = readOBJ(getAssetPath('crash2.obj'), (0.9, 0.6, 0.2))
     gpuSuzanne = createGPUShape(pipeline, shapeSuzanne)
 
-    shapeCarrot = readOBJ(getAssetPath('carrot.obj'), (0.6, 0.9, 0.5))
+    shapeCarrot = readOBJ(getAssetPath('crash_pose.obj'), (0.6, 0.9, 0.5))
     gpuCarrot = createGPUShape(pipeline, shapeCarrot)
 
     # Setting uniforms that will NOT change on each iteration
@@ -248,14 +248,13 @@ if __name__ == "__main__":
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1], viewPos[2])
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
 
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(3))
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(0.5))
         pipeline.drawCall(gpuSuzanne)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
                            tr.matmul([
                                tr.uniformScale(3),
-                               tr.rotationX(np.pi / 2),
-                               tr.translate(1.5, -0.25, 0)])
+                               tr.translate(2.5, 0, 2)])
                            )
         pipeline.drawCall(gpuCarrot)
 

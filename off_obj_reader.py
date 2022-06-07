@@ -72,15 +72,18 @@ def readOBJ(filename, color):
             aux = line.strip().split(' ')
 
             if aux[0] == 'v':
-                vertices += [[float(coord) for coord in aux[1:]]]
+                vertices += [[float(coord) for coord in aux[1:] if coord]]
 
             elif aux[0] == 'vn':
                 normals += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vt':
-                assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                textCoords += [[float(coord) for coord in aux[1:]]]
-
+                if float(aux[-1])==0.0 and len(aux[1:])>2:
+                    textCoords += [[float(coord) for coord in aux[1:-1]]]
+                elif len(aux[1:])==2:
+                    textCoords += [[float(coord) for coord in aux[1:]]]
+                else:
+                    raise ValueError('3D Textures are not allowed')
             elif aux[0] == 'f':
                 N = len(aux)
                 faces += [[readFaceVertex(faceVertex) for faceVertex in aux[1:4]]]
@@ -199,7 +202,7 @@ def readOFF(filename, color):
         return bs.Shape(vertexDataF, indices)
 
 if __name__ == "__main__":
-
+    window=0
     # Initialize glfw
     if not glfw.init():
         glfw.set_window_should_close(window, True)
