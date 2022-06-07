@@ -329,4 +329,4 @@ def create_level(pipeline,x,y):
     level=sg.SceneGraphNode("level")
     level.transform = tr.uniformScale(1)
     level.childs += [STARTbox,hallway,FINISHbox,floors]
-    return level
+    return [level,d]

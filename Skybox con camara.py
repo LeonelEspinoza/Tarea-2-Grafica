@@ -29,6 +29,8 @@ class Controller:
         self.vista3 = True
         self.cambiovista = False
         self.IsOnGround = True
+        self.end=False
+        self.canjump=True
 ###########################################################
         self.theta = np.pi
         self.eye = [0, 0, 0.1]  # Básicamente la posición del jugador
@@ -41,7 +43,21 @@ class Controller:
 controller = Controller()
 
 def process_on_key(dt):
-    if glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS:
+    vel =2
+    if (glfw.get_key(window, glfw.KEY_W) == glfw.PRESS) and (glfw.get_key(window, glfw.KEY_A) == glfw.PRESS):
+        if controller.eye[1]>-1:
+            controller.eye[1] -= vel * dt
+            controller.at[1] -= vel * dt
+        controller.eye[0] -= vel * dt
+        controller.at[0] -= vel * dt
+    elif (glfw.get_key(window, glfw.KEY_W) == glfw.PRESS) and (glfw.get_key(window, glfw.KEY_D) == glfw.PRESS):
+        if controller.eye[1]<1:
+            controller.eye[1] += vel * dt
+            controller.at[1] += 1 * dt
+        controller.eye[0] -= vel * dt
+        controller.at[0] -= vel * dt
+
+    elif glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS:
         controller.theta += 2 * dt
 
     elif glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS:
@@ -49,62 +65,80 @@ def process_on_key(dt):
 
     elif glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
         if controller.eye[1]>-1:
-            controller.eye[1] -= 1 * dt
-            controller.at[1] -= 1 * dt
+            controller.eye[1] -= vel * dt
+            controller.at[1] -= vel * dt
 
     elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
         if controller.eye[1]<1:
-            controller.eye[1] += 1 * dt
+            controller.eye[1] += vel * dt
             controller.at[1] += 1 * dt
 
     elif glfw.get_key(window, glfw.KEY_W) == glfw.PRESS:
-        controller.eye += (controller.at - controller.eye) * dt
-        controller.at += (controller.at - controller.eye) * dt
+        controller.eye[0] -= vel * dt
+        controller.at[0] -= vel * dt
 
     elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
         if controller.eye[0]<1:
-            controller.eye -= (controller.at - controller.eye) * dt
-            controller.at -= (controller.at - controller.eye) * dt
+            controller.eye[0] += vel * dt
+            controller.at[0] += vel * dt
     
     elif glfw.get_key(window, glfw.KEY_LEFT_SHIFT) == glfw.PRESS:
         if controller.eye[2]>0.1:
-            controller.eye[2] -= 1 * dt
-            controller.at[2] -= 1 * dt
+            controller.eye[2] -= vel * dt
+            controller.at[2] -= vel * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
         if controller.eye[2]<1:
-            controller.eye[2] += 1 * dt
-            controller.at[2] += 1 * dt
+            controller.eye[2] += vel * dt
+            controller.at[2] += vel * dt
 
 def process_on_key3(dt):
-    if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
+    vel = 2
+    if (glfw.get_key(window, glfw.KEY_W) == glfw.PRESS) and (glfw.get_key(window, glfw.KEY_A) == glfw.PRESS):
         if controller.at[1]>-1:
-            controller.eye[1] -= 1 * dt
-            controller.at[1] -= 1 * dt
+            controller.eye[1] -= vel * dt
+            controller.at[1] -= vel * dt
+        controller.eye[0] -= vel * dt
+        controller.at[0] -= vel * dt
+
+    elif (glfw.get_key(window, glfw.KEY_W) == glfw.PRESS) and (glfw.get_key(window, glfw.KEY_D) == glfw.PRESS):
+        if controller.at[1]<1:
+            controller.eye[1] += vel * dt
+            controller.at[1] += vel * dt
+        controller.eye[0] -= vel * dt
+        controller.at[0] -= vel * dt
+
+    elif glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
+        if controller.at[1]>-1:
+            controller.eye[1] -= vel * dt
+            controller.at[1] -= vel * dt
 
     elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
         if controller.at[1]<1:
-            controller.eye[1] += 1 * dt
-            controller.at[1] += 1 * dt
+            controller.eye[1] += vel * dt
+            controller.at[1] += vel * dt
 
     elif glfw.get_key(window, glfw.KEY_W) == glfw.PRESS: #este no necesita limite porque le quitare el control al jugador al llegar al final
-        controller.eye[0] -= 1 * dt
-        controller.at[0] -= 1 * dt
+        controller.eye[0] -= vel * dt
+        controller.at[0] -= vel * dt
 
     elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
         if controller.eye[0]<1:
-            controller.eye[0] += 1 * dt
-            controller.at[0] += 1 * dt
+            controller.eye[0] += vel * dt
+            controller.at[0] += vel * dt
     
     elif glfw.get_key(window, glfw.KEY_LEFT_SHIFT) == glfw.PRESS:
         if controller.at [2]>0.1:
-            controller.eye[2] -= 1 * dt
-            controller.at[2] -= 1 * dt
+            controller.eye[2] -= vel * dt
+            controller.at[2] -= vel * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
         if controller.at[2]<1:
-            controller.eye[2] += 1 * dt
-            controller.at[2] += 1 * dt
+            controller.eye[2] += vel * dt
+            controller.at[2] += vel * dt
+        controller.canjump=False
+        #chantar funcion que lleve al jugador en una trayectoria de salto y que permita que ademas se mueva en x,y pero no en z
+
     
 def on_key(window, key, scancode, action, mods):
 
@@ -153,8 +187,10 @@ if __name__ == "__main__":
     glEnable(GL_DEPTH_TEST)
 
     # Creating shapes on GPU memory
-    level = ModeloTarea.create_level(textureShaderProgram,x,y)
-
+    INFOlevel = ModeloTarea.create_level(textureShaderProgram,x,y)
+    level= INFOlevel[0]
+    d=INFOlevel[1]
+    
     # Creamos una GPUShape a partir de un obj
     # Acá pueden poner carrot.obj, eiffel.obj, suzanne.obj
     shapeSuzanne = obj.readOBJ(getAssetPath('crash_pose.obj'), (1.0, 0.0, 0.0))
@@ -184,20 +220,23 @@ if __name__ == "__main__":
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
         #vista primera-tercera persona
-        if (controller.vista3):  #vista tercera persona
+        if controller.vista3:  #vista tercera persona
             if not (controller.cambiovista):  
                 controller.at = controller.eye                                  #la camara mira a donde está el personaje
                 controller.eye= controller.eye - np.array([-0.8, 0, -0.4])      #la camara retrocede en x y sube en z, no cambia en y
-                controller.cambiovista = True
-                print(controller.at)
-                print(controller.eye)
+                controller.cambiovista = True                                   #se completo el cambio de vista a primera persona
             
-            if controller.at[2]<=0.1:
-                controller.IsOnGround = False 
-            else:
-                controller.IsOnGround = True
+            if controller.at[2]<=0.1: #esta bajo o en el nivel de la tierra
+                controller.IsOnGround = False #esta en tierra
+                controller.canjump = True
+            else:                     #esta sobre el nivel de la tierra
+                controller.IsOnGround = True #no esta en tierra
+                controller.canjump= False
 
-            process_on_key3(dt)
+            if controller.at[0]>=-d-1:  #no llego al final del nivel
+                process_on_key3(dt) #puede usar los controles
+            else:                       #llego al final del nivel
+                controller.end=True #no puede usar los controles y salta pantalla ganador
 
             view = tr.lookAt(
                 controller.eye,
@@ -209,16 +248,17 @@ if __name__ == "__main__":
             if (controller.cambiovista):
                 controller.at = controller.at + np.array([0,1,0])               #la camara mira justo en frente de donde está el personaje
                 controller.eye = controller.eye + np.array([-0.8, 0, -0.4])     #la camara avanza en x y baja en z, no cambia en y
-                controller.cambiovista = False
-                print(controller.at)
-                print(controller.eye)
+                controller.cambiovista = False                                  #se completo el cambio de vista a tercera persona
 
-            if controller.eye[2]<=0.1:
-                controller.IsOnGround = False 
-            else:
-                controller.IsOnGround = True
-
-            process_on_key(dt)
+            if controller.eye[2]<=0.1:  #esta bajo o en el nivel de la tierra
+                controller.IsOnGround = False   #esta en la tierra
+            else:                       #esta sobre el nivel de la tierra
+                controller.IsOnGround = True    #no esta en la tierra
+            
+            if controller.eye[0]>=-d-1: #no llego al final del nivel
+                process_on_key(dt)  #puede usar los controles
+            else:                       #llego al final del nivel
+                controller.end=True #no puede usar los controles y aparece pantalla ganador
             
             at_x = controller.eye[0] + np.cos(controller.theta)
             at_y = controller.eye[1] + np.sin(controller.theta)
@@ -253,7 +293,7 @@ if __name__ == "__main__":
             # Se escala, se rota y se sube, en ese orden
             suzanne_transform = tr.matmul(
                 [
-                    tr.translate(controller.at[0]-0.8,controller.at[1]-0.3,controller.at[2]+0.1), #controller.at[0],controller.at[1]+0.1,controller.at[2]-0.1
+                    tr.translate(controller.at[0]-0.8,controller.at[1]-0.3,controller.at[2]+0.1), 
                     tr.rotationX(np.pi/2),
                     tr.rotationY(np.pi/-2),
                     tr.uniformScale(0.2),
@@ -263,8 +303,8 @@ if __name__ == "__main__":
             glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "model"), 1, GL_TRUE, suzanne_transform)
             glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
             glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "projection"), 1, GL_TRUE, projection)
-            # Esto es para indicarle al shader de luz parámetros, pero por ahora no lo veremos
-            lightShaderProgram.set_light_attributes() # IGNORAR
+            # Esto es para indicarle al shader de luz parámetros
+            lightShaderProgram.set_light_attributes()
             lightShaderProgram.drawCall(gpuSuzanne)
             
         
