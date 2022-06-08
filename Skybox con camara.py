@@ -18,9 +18,9 @@ from grafica.assets_path import getAssetPath
 
 import ModeloTarea
 
-x=0.8#recomendable 0-5, rango 0-1, mayor es execivo
+x=0.8#recomendable 0-0.5, rango 0-1 (esta variable es el largo del salto y el alto del salto)
 y=8#largo
-z=5#tiempo
+z=5#tiempo luz
 
 
 # A class to store the application control
@@ -30,7 +30,8 @@ class Controller:
         self.cambiovista = False
         self.IsOnGround = True
         self.end=False
-        self.canjump=True
+        self.GoUp=False
+        self.jump=False
 ###########################################################
         self.theta = np.pi
         self.eye = [0, 0, 0.1]  # Básicamente la posición del jugador
@@ -42,6 +43,28 @@ class Controller:
 # global controller as communication with the callback function
 controller = Controller()
 
+def jump(dt):
+    #esta funcion se llama dentro del while por tanto la logica es como un while
+    #ademas solo se llama mientras este la señal de salto
+    vel=2
+    if controller.GoUp:  #mientras este activa la señal de subir
+        controller.eye[2] += vel * dt #sube
+        controller.at[2] += vel * dt
+        if controller.vista3:   #si vista en tercera persona
+            if controller.at[2]>=x: #si el personaje llega a la altura maxima de salto 
+                controller.GoUp = False # deja de subir
+        else:
+            if controller.eye[2]>=x: #si llegamos a la altura maxima de salto
+                controller.GoUp = False #deja de subir
+
+    else:                   #mientras no este activa la señal de subir
+        controller.eye[2] -= vel * dt   #baja
+        controller.at[2] -= vel * dt
+        if controller.at[2]<=0.1:  #si llega al tope del suelo!!cambiar por la funicion suelo para caer de las plataformas
+            controller.jump=False   #deja de saltar (termina el ciclo del salto)
+
+
+
 def process_on_key(dt):
     vel =2
     if (glfw.get_key(window, glfw.KEY_W) == glfw.PRESS) and (glfw.get_key(window, glfw.KEY_A) == glfw.PRESS):
@@ -50,6 +73,7 @@ def process_on_key(dt):
             controller.at[1] -= vel * dt
         controller.eye[0] -= vel * dt
         controller.at[0] -= vel * dt
+
     elif (glfw.get_key(window, glfw.KEY_W) == glfw.PRESS) and (glfw.get_key(window, glfw.KEY_D) == glfw.PRESS):
         if controller.eye[1]<1:
             controller.eye[1] += vel * dt
@@ -88,9 +112,9 @@ def process_on_key(dt):
             controller.at[2] -= vel * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        if controller.eye[2]<1:
-            controller.eye[2] += vel * dt
-            controller.at[2] += vel * dt
+        if controller.IsOnGround:   #si esta en la tierra
+            controller.jump=True    #da la señal de saltar  
+            controller.GoUp=True    #y empieza a subir
 
 def process_on_key3(dt):
     vel = 2
@@ -133,11 +157,9 @@ def process_on_key3(dt):
             controller.at[2] -= vel * dt
     
     elif glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        if controller.at[2]<1:
-            controller.eye[2] += vel * dt
-            controller.at[2] += vel * dt
-        controller.canjump=False
-        #chantar funcion que lleve al jugador en una trayectoria de salto y que permita que ademas se mueva en x,y pero no en z
+        if controller.IsOnGround:   #si esta en la tierra
+            controller.jump=True    #da la señal de saltar  
+            controller.GoUp=True    #y empieza a subir
 
     
 def on_key(window, key, scancode, action, mods):
@@ -227,17 +249,19 @@ if __name__ == "__main__":
                 controller.cambiovista = True                                   #se completo el cambio de vista a primera persona
             
             if controller.at[2]<=0.1: #esta bajo o en el nivel de la tierra
-                controller.IsOnGround = False #esta en tierra
-                controller.canjump = True
+                controller.IsOnGround = True #esta en tierra
+                
             else:                     #esta sobre el nivel de la tierra
-                controller.IsOnGround = True #no esta en tierra
-                controller.canjump= False
+                controller.IsOnGround = False #no esta en tierra
 
             if controller.at[0]>=-d-1:  #no llego al final del nivel
                 process_on_key3(dt) #puede usar los controles
             else:                       #llego al final del nivel
                 controller.end=True #no puede usar los controles y salta pantalla ganador
 
+            if controller.jump: #si se da la señal de saltar
+                jump(dt)        #salta
+                
             view = tr.lookAt(
                 controller.eye,
                 controller.at,
@@ -245,21 +269,25 @@ if __name__ == "__main__":
             )
 
         else: #vista primera persona
-            if (controller.cambiovista):
+            if controller.cambiovista:
                 controller.at = controller.at + np.array([0,1,0])               #la camara mira justo en frente de donde está el personaje
                 controller.eye = controller.eye + np.array([-0.8, 0, -0.4])     #la camara avanza en x y baja en z, no cambia en y
                 controller.cambiovista = False                                  #se completo el cambio de vista a tercera persona
 
             if controller.eye[2]<=0.1:  #esta bajo o en el nivel de la tierra
-                controller.IsOnGround = False   #esta en la tierra
+                controller.IsOnGround = True   #esta en la tierra
             else:                       #esta sobre el nivel de la tierra
-                controller.IsOnGround = True    #no esta en la tierra
+                controller.IsOnGround = False    #no esta en la tierra
             
             if controller.eye[0]>=-d-1: #no llego al final del nivel
                 process_on_key(dt)  #puede usar los controles
             else:                       #llego al final del nivel
                 controller.end=True #no puede usar los controles y aparece pantalla ganador
             
+            if controller.jump: #si se da la señal de saltar
+                jump(dt)        #salta
+            
+
             at_x = controller.eye[0] + np.cos(controller.theta)
             at_y = controller.eye[1] + np.sin(controller.theta)
             controller.at = np.array([at_x, at_y, controller.at[2]])
