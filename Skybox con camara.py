@@ -201,6 +201,9 @@ if __name__ == "__main__":
     textureShaderProgram = es.SimpleTextureModelViewProjectionShaderProgram()
     colorShaderProgram = es.SimpleModelViewProjectionShaderProgram()
     lightShaderProgram = ls.SimpleGouraudShaderProgram()
+    textureLightShaderProgram = ls.SimpleTextureGouraudShaderProgram()
+
+
     # Setting up the clear screen color
     glClearColor(0.85, 0.85, 0.85, 1.0)
 
@@ -305,12 +308,12 @@ if __name__ == "__main__":
 
 
         ###DIBUJO LEVEL###
-        glUseProgram(textureShaderProgram.shaderProgram)
-        glUniformMatrix4fv(glGetUniformLocation(textureShaderProgram.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        glUniformMatrix4fv(glGetUniformLocation(textureShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
-        #glUniformMatrix4fv(glGetUniformLocation(textureShaderProgram.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        glUseProgram(textureLightShaderProgram.shaderProgram)
+        glUniformMatrix4fv(glGetUniformLocation(textureLightShaderProgram.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(textureLightShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
+        textureLightShaderProgram.set_light_attributes(controller.at[0],controller.at[1],controller.at[2]+1)
         
-        sg.drawSceneGraphNode(level, textureShaderProgram, 'model')
+        sg.drawSceneGraphNode(level, textureLightShaderProgram, 'model')
         ###---###
 
         
@@ -332,7 +335,7 @@ if __name__ == "__main__":
             glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "view"), 1, GL_TRUE, view)
             glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram.shaderProgram, "projection"), 1, GL_TRUE, projection)
             # Esto es para indicarle al shader de luz parámetros
-            lightShaderProgram.set_light_attributes()
+            lightShaderProgram.set_light_attributes(controller.at[0],controller.at[1],controller.at[2]+1)
             lightShaderProgram.drawCall(gpuSuzanne)
             
         

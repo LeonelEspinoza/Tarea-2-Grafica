@@ -376,18 +376,18 @@ class SimpleGouraudShaderProgram():
         glBindVertexArray(0)
 
     # Función agregada para simplificar las cosas
-    def set_light_attributes(self):
-        glUniform3f(glGetUniformLocation(self.shaderProgram, "La"), 1.0, 1.0, 1.0)
+    def set_light_attributes(self,x,y,z):
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "La"), 0.0, 0.0, 0.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ls"), 0.0, 0.0, 0.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ka"), 0.2, 0.2, 0.2)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Kd"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ks"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(self.shaderProgram, "lightPosition"), -3, 0, 3)
-        glUniform1ui(glGetUniformLocation(self.shaderProgram, "shininess"), 100)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.001)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 0.1)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.01)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ks"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "lightPosition"), x, y, z)
+        glUniform1ui(glGetUniformLocation(self.shaderProgram, "shininess"), 50)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.01)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 1)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.1)
 
 
 class SimpleTextureGouraudShaderProgram():
@@ -511,6 +511,21 @@ class SimpleTextureGouraudShaderProgram():
 
         # Unbind the current VAO
         glBindVertexArray(0)
+    
+    # Función agregada para simplificar las cosas
+    def set_light_attributes(self,x,y,z):
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "La"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ls"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ka"), 0.2, 0.2, 0.2)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Kd"), 0.9, 0.9, 0.9)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "Ks"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(self.shaderProgram, "lightPosition"), x, y, z)
+        glUniform1ui(glGetUniformLocation(self.shaderProgram, "shininess"), 50)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.01)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 1)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.1)
+
 
 
 class SimplePhongShaderProgram:
