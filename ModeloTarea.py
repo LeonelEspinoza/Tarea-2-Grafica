@@ -294,9 +294,8 @@ def randomfloor3(pipeline,n,d,x,anterior):
             return create_full_floor3(pipeline,n,d,x)
 
 def create_level(pipeline,x,y):
-
+    floorlist=[("start",0)]
     STARTbox=create_START_BOX(pipeline)
-
     hallway=sg.SceneGraphNode("hallway")
     hallway.transform=tr.uniformScale(1)
     n=1
@@ -308,10 +307,13 @@ def create_level(pipeline,x,y):
             tube=create_TUBE2(pipeline,n,d,x)
             floor=randomfloor2(pipeline,n,d,x,anterior)
             anterior = floor[2]
+            floorlist+=[(anterior,2)]
+
         else:
             tube=create_TUBE3(pipeline,n,d,x)
             floor=randomfloor3(pipeline,n,d,x,anterior)
             anterior = floor[2]
+            floorlist+=[(anterior,3)]
 
         hallway.childs += [tube[0],floor[0]]
         d=tube[1]
@@ -321,12 +323,12 @@ def create_level(pipeline,x,y):
     floors.transform = tr.uniformScale(1)
     floor1=create_floor(pipeline,0,-1)
     floor2=create_floor(pipeline,n,d)
+    floorlist+=[("finish",0)]
     floors.childs += [floor1,floor2]
     
 
     FINISHbox=create_FINISH_BOX(pipeline,d)
-
     level=sg.SceneGraphNode("level")
     level.transform = tr.uniformScale(1)
     level.childs += [STARTbox,hallway,FINISHbox,floors]
-    return [level,d]
+    return [level,d,floorlist]

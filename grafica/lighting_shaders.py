@@ -376,7 +376,7 @@ class SimpleGouraudShaderProgram():
         glBindVertexArray(0)
 
     # Función agregada para simplificar las cosas
-    def set_light_attributes(self,x,y,z):
+    def set_light_attributes(self,x,y,z,l):
         glUniform3f(glGetUniformLocation(self.shaderProgram, "La"), 0.0, 0.0, 0.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ls"), 0.0, 0.0, 0.0)
@@ -385,9 +385,9 @@ class SimpleGouraudShaderProgram():
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ks"), 0.0, 0.0, 0.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "lightPosition"), x, y, z)
         glUniform1ui(glGetUniformLocation(self.shaderProgram, "shininess"), 50)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.01)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 1)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.1)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.01*l)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 1*l)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.1*l)
 
 
 class SimpleTextureGouraudShaderProgram():
@@ -513,7 +513,7 @@ class SimpleTextureGouraudShaderProgram():
         glBindVertexArray(0)
     
     # Función agregada para simplificar las cosas
-    def set_light_attributes(self,x,y,z):
+    def set_light_attributes(self,x,y,z,l):
         glUniform3f(glGetUniformLocation(self.shaderProgram, "La"), 0.0, 0.0, 0.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ls"), 0.0, 0.0, 0.0)
@@ -522,9 +522,9 @@ class SimpleTextureGouraudShaderProgram():
         glUniform3f(glGetUniformLocation(self.shaderProgram, "Ks"), 0.0, 0.0, 0.0)
         glUniform3f(glGetUniformLocation(self.shaderProgram, "lightPosition"), x, y, z)
         glUniform1ui(glGetUniformLocation(self.shaderProgram, "shininess"), 50)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.01)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 1)
-        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.1)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "constantAttenuation"), 0.01*l)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "linearAttenuation"), 1*l)
+        glUniform1f(glGetUniformLocation(self.shaderProgram, "quadraticAttenuation"), 0.1*l)
 
 
 
