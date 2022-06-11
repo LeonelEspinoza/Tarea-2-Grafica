@@ -14,13 +14,15 @@ import grafica.easy_shaders as es
 import grafica.scene_graph as sg
 import grafica.lighting_shaders as ls
 import off_obj_reader as obj
+import grafica.text_renderer as tx
+
 from grafica.assets_path import getAssetPath
 
 import ModeloTarea
 
 #ejemplo de llamada: python lights_out.py 0.8 3 5
 x=float(sys.argv[1])#recomendable 0-0.5, rango 0-1 (esta variable es el largo del salto y el alto del salto)
-y=int(sys.argv[2])#largo nivel
+y=int(sys.argv[2])+2#largo nivel
 z=int(sys.argv[3])#tiempo luz
 #x=0.5
 #y=3
@@ -217,10 +219,13 @@ if __name__ == "__main__":
     colorShaderProgram = es.SimpleModelViewProjectionShaderProgram()
     lightShaderProgram = ls.SimpleGouraudShaderProgram()
     textureLightShaderProgram = ls.SimpleTextureGouraudShaderProgram()
-
+    textPipeline = tx.TextureTextRendererShaderProgram()
 
     # Setting up the clear screen color
     glClearColor(0.85, 0.85, 0.85, 1.0)
+
+    textBitsTexture = tx.generateTextBitsTexture()
+    gpuText3DTexture = tx.toOpenGLTexture(textBitsTexture)
 
     # As we work in 3D, we need to check which part is in front,
     # and which one is at the back
@@ -256,7 +261,27 @@ if __name__ == "__main__":
     floorXfinishat=floorcol[0][1]    #donde termina el piso en x
     floorYstartat=floorcol[1][0]     #donde comienza el piso en y
     floorYfinishat=floorcol[1][1]    #donde termina el piso en y
+
+    headerText = "YOU LOSE"
+    headerCharSize = 0.1
+    headerCenterX = headerCharSize * len(headerText) / 2
+    headerShape = tx.textToShape(headerText, headerCharSize, headerCharSize)
+    gpuHeader = es.GPUShape().initBuffers()
+    textPipeline.setupVAO(gpuHeader)
+    gpuHeader.fillBuffers(headerShape.vertices, headerShape.indices, GL_STATIC_DRAW)
+    gpuHeader.texture = gpuText3DTexture
+    headerTransform = tr.translate(0,-0.5,0)
     
+    headerText2 = "YOU WIN"
+    headerCharSize2 = 0.1
+    headerCenterX2 = headerCharSize2 * len(headerText2) / 2
+    headerShape2 = tx.textToShape(headerText2, headerCharSize2, headerCharSize2)
+    gpuHeader2 = es.GPUShape().initBuffers()
+    textPipeline.setupVAO(gpuHeader2)
+    gpuHeader2.fillBuffers(headerShape2.vertices, headerShape2.indices, GL_STATIC_DRAW)
+    gpuHeader2.texture = gpuText3DTexture
+    headerTransform = tr.translate(0,-0.5,0)
+
     while not glfw.window_should_close(window):
         # Using GLFW to check for input events
         glfw.poll_events()
@@ -307,7 +332,7 @@ if __name__ == "__main__":
 
             if controller.at[0]>=-d-1 and not controller.lose:  #aun no llego al final del nivel
                 process_on_key3(dt) #puede usar los controles
-            else:                       #llego al final del nivel
+            elif not controller.lose:                       #llego al final del nivel
                 controller.victory=True #no puede usar los controles y salta pantalla ganador
 
             if controller.jump: #si se da la señal de saltar
@@ -356,7 +381,7 @@ if __name__ == "__main__":
             
             if controller.eye[0]>=-d-1 and not controller.lose:  #aun no llego al final del nivel
                 process_on_key(dt) #puede usar los controles
-            else:                       #llego al final del nivel
+            elif not controller.lose:                       #llego al final del nivel
                 controller.victory=True
             
             if controller.jump: #si se da la señal de saltar
@@ -421,11 +446,24 @@ if __name__ == "__main__":
             lightShaderProgram.drawCall(gpuSuzanne)
             
         if controller.victory:
+            controller.lightOn=True
+            tl=1
+            glUseProgram(textPipeline.shaderProgram)
+            glUniform4f(glGetUniformLocation(textPipeline.shaderProgram, "fontColor"), 1, 1, 1, 1)
+            glUniform4f(glGetUniformLocation(textPipeline.shaderProgram, "backColor"), 0, 0, 0, 1)
+            glUniformMatrix4fv(glGetUniformLocation(textPipeline.shaderProgram, "transform"), 1, GL_TRUE, headerTransform)
+            textPipeline.drawCall(gpuHeader2)
             #pantalla victoria
-            pass
+            
         if controller.lose:
+            controller.lightOn=True
+            tl=1
+            glUseProgram(textPipeline.shaderProgram)
+            glUniform4f(glGetUniformLocation(textPipeline.shaderProgram, "fontColor"), 1, 1, 1, 1)
+            glUniform4f(glGetUniformLocation(textPipeline.shaderProgram, "backColor"), 0, 0, 0, 1)
+            glUniformMatrix4fv(glGetUniformLocation(textPipeline.shaderProgram, "transform"), 1, GL_TRUE, headerTransform)
+            textPipeline.drawCall(gpuHeader)
             #pantalla derrota
-            pass
 
         # Once the drawing is rendered, buffers are swap so an uncomplete drawing is never seen.
         glfw.swap_buffers(window)
